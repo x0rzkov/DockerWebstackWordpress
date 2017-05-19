@@ -1,0 +1,77 @@
+nginx:
+  image: nginx
+  restart: always
+  ports:
+    - 8080:80
+    - 443:443
+  links:
+    - wordpress
+  volumes_from:
+    - wordpress:ro
+  volumes:
+    - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    - ./nginx/log:/var/log/nginx
+
+wordpress:
+  build: wordpress
+  restart: always
+  links:
+    - mysql
+    - memcached
+  volumes:
+    - ./www:/var/www/html/
+  environment:
+    WORDPRESS_DB_USER: wordpress
+    WORDPRESS_DB_PASSWORD: password
+    WORDPRESS_DB_NAME: wordpress
+
+mysql:
+  image: mariadb
+  restart: always
+  ports :
+    - "3306:3306"
+  volumes:
+    - ./mysql:/var/lib/mysql
+  environment:
+    MYSQL_DATABASE: wordpress
+    MYSQL_USER: wordpress
+    MYSQL_PASSWORD: password
+    MYSQL_ROOT_PASSWORD: password
+
+phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports :
+      - "8082:80"
+    links:
+      - mysql:db
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+
+memcached:
+  image: memcached
+  restart: always
+  ports:
+    - "11211:11211"
+
+varnish:
+  image: million12/varnish
+  environment:
+    CACHE_SIZE: 64m
+  links:
+    - nginx
+  volumes:
+    - ./varnish/default.vcl:/etc/varnish/default.vcl
+  ports:
+    - 80:80
+
+cadvisor:
+  image: google/cadvisor
+  ports:
+    - 8081:8080
+  restart: always
+  volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
