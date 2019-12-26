@@ -1,4 +1,6 @@
 mysql/
 www/
+www2/
 theme/
 nginx/log
+*.zip

@@ -1,6 +1,6 @@
-FROM wordpress:php7.1-fpm
+FROM wordpress:php7.2-fpm
 
-RUN apt-get update && apt-get install -y zlib1g-dev tidy csstidy vim libmemcached-dev
+RUN apt-get update && apt-get install -y zlib1g-dev tidy csstidy vim libmemcached-dev libzip-dev
 
 RUN docker-php-ext-install zip
 
