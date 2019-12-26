@@ -2,10 +2,6 @@
 version: "3.7"
 services:
 
-  # refs
-  # - https://github.com/airdata/docker-traefik-wordpress/blob/master/Dockerfile
-  # - 
-
   nginx:
     image: nginx
     container_name: ${NAMESPACE}_nginx
@@ -25,8 +21,23 @@ services:
     - letsencrypt_certs:/etc/nginx/ssl
     - letsencrypt_www:/var/www/letsencrypt
 
+  traefik:
+    image: traefik:latest
+    networks:
+    - internal
+    - web
+    container_name: ${NAMESPACE}_traefik
+    ports:
+    - "81:80"
+    - "8085:8080"
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ./traefik.toml:/traefik.toml
+    - ./acme.json:/acme.json
+
   wordpress:
     build: wordpress
+    image: x0rzkov/wordpress:latest
     container_name: ${NAMESPACE}_wordpress
     restart: always
     links:
@@ -65,6 +76,7 @@ services:
 
   backup:
     image: zeenlym/mariadb-backup
+    container_name: ${NAMESPACE}_backup
     depends_on:
     - mysql
     restart: unless-stopped
@@ -86,6 +98,7 @@ services:
 
   adminer:
     image: adminer
+    container_name: ${NAMESPACE}_adminer
     restart: unless-stopped
     depends_on:
     - mysql

@@ -1,8 +1,28 @@
-## traefik.toml
+debug = false
 
-# API and dashboard configuration
-[api]
+logLevel = "ERROR"
+defaultEntryPoints = ["https","http"]
 
-# Docker configuration backend
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+    [entryPoints.http.redirect]
+    entryPoint = "https"
+  [entryPoints.https]
+  address = ":443"
+  [entryPoints.https.tls]
+
+[retry]
+
 [docker]
-  domain = "docker.localhost"
+endpoint = "unix:///var/run/docker.sock"
+watch = true
+exposedbydefault = true
+
+[acme]
+email = "youemail@example.com"
+storage = "acme.json"
+entryPoint = "https"
+OnHostRule = true
+[acme.httpChallenge]
+entryPoint = "http"
